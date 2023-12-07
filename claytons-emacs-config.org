@@ -1,0 +1,512 @@
+#+TITLE: Clayton's Emacs config
+#+PROPERTY: header-args :tangle .emacs
+
+* Emacs config
+This is Clayton's config for Emacs.
+
+Tangle this config via ~M-x org-babel-tangle~ (~C-c C-v t~)
+
+Keybinding table:
+
+| Command                    | Keybinding |
+|----------------------------+------------|
+| General-use                |            |
+| ~M-x replace-string~         | ~C-c r~      |
+| ~M-x multi-term~             | ~C-c m~      |
+| Org                        |            |
+| ~M-x org-store-link~         | ~C-c l~      |
+| ~M-x org-agenda~             | ~C-c a~      |
+| ~M-x org-capture~            | ~C-c c~      |
+| Org Roam                   |            |
+| ~M-x org-roam-buffer-toggle~ | ~C-c n l~    |
+| ~M-x org-~roam-node-find~     | ~C-c n f~    |
+| ~M-x org-roam-insert~        | ~C-c n i~    |
+| ~M-x org-roam-dailies-map~   | ~C-c n d~    |
+| Projectile                 |            |
+| ~M-x projectile-command-map~ | ~C-c p~      |
+| ~M-x projectile-file-file~   | ~C-c p f~    |
+|                            |            |
+
+
+
+* Menu and window
+#+BEGIN_SRC elisp
+  ;;(when window-system (set-frame-size (selected-frame) 160 60)) ; frame size
+  (setq inhibit-startup-message t) ; skip the startup screen
+  (scroll-bar-mode -1) ; disable the scroll bar
+  (tool-bar-mode -1) ; disable the tool abr
+  (set-fringe-mode 10) ; give some breathing room
+  ;;(menu-bar-mode -1) ; disable the menu bar
+  (setq visible-bell t) ; set up the visible bell
+  (blink-cursor-mode 0) ; disable the blinking cursor
+  (use-package saveplace
+    :init (save-place-mode)) ; save place in the buffer
+#+END_SRC 
+* Package sources
+#+BEGIN_SRC elisp
+    ;; initialize package sources
+    (require 'package)
+    (setq package-archives '(("melpa" . "https://melpa.org/packages/")
+			     ("org" . "https://orgmode.org/elpa/")
+			     ("elpa" . "https://elpa.gnu.org/packages/")
+			     ("melpa-stable" . "https://stable.melpa.org/packages/")))
+    (package-initialize)
+    (unless package-archive-contents
+      (package-refresh-contents))
+
+    ;; initialize use-package on non-Linux platforms
+    (unless (package-installed-p 'use-package)
+      (package-install 'use-package))
+
+    (require 'use-package)
+    (setq use-package-always-ensure t)
+#+END_SRC 
+* Custom keybindings
+#+BEGIN_SRC elisp
+(global-set-key (kbd "C-c r") #'replace-string)
+(global-set-key (kbd "C-c m") #'multi-term)
+#+END_SRC 
+* Theme
+#+BEGIN_SRC elisp
+  (setq custom-safe-themes t) ;; treat themes as safe
+  (require 'doom-themes)
+  (require 'standard-themes)
+  ;; Set theme
+  ;; theme packages
+  (use-package doom-themes)
+  (use-package standard-themes)
+  ;; load theme
+  ;;(load-theme 'doom-dracula)
+  ;;(load-theme 'doom-nord-light)
+  ;;(load-theme 'doom-molokai)
+  ;;(load-theme 'doom-snazzy)
+  ;;(load-theme 'doom-zenburn)
+  ;;(load-theme 'doom-gruvbox-light)
+  ;;(load-theme 'doom-acario-light)
+  ;;(load-theme 'doom-acario-dark)
+  ;;(load-theme 'doom-flatwhite)
+  ;;(load-theme 'doom-solarized-light)
+  ;;(load-theme 'doom-ayu-light)
+  ;;(load-theme 'doom-sourcerer)
+  ;;(load-theme 'doom-ephemeral)
+  ;;(load-theme 'tsdh-light)
+  ;;(standard-themes-load-light)
+  ;;(load-theme 'doom-tomorrow-day)
+  (load-theme 'standard-dark)
+
+#+END_SRC 
+
+* ESC key
+make ESC quit prompts
+#+BEGIN_SRC elisp
+  (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+#+END_SRC 
+
+* Delete-selection-mode
+overwrite selected text
+#+BEGIN_SRC elisp
+  (delete-selection-mode 1)
+#+END_SRC 
+
+* Rainbow delimiters
+#+BEGIN_SRC elisp
+  ;; use rainbow delimeters
+  (use-package rainbow-delimiters
+    :hook (prog-mode . rainbow-delimiters-mode))
+#+END_SRC 
+
+* Transparency
+#+BEGIN_SRC elisp
+  ;;(set-frame-parameter (selected-frame) 'alpha '(98 98))
+  ;;(add-to-list 'default-frame-alist '(alpha 98 98))
+#+END_SRC 
+
+* Font
+#+BEGIN_SRC elisp
+  (set-face-attribute 'default nil :font "FantasqueSansM Nerd Font" :height 115)
+  ;;(set-face-attribute 'default nil :font "FiraCode Nerd Font" :height 115)
+  ;;(set-face-attribute 'default nil :font "Hack" :height 115)
+
+  ;; set the fixed-pitch face
+  (set-face-attribute 'fixed-pitch nil :font "FantasqueSansM Nerd Font" :height 115)
+
+  ;; set the variable-pitch face
+  (set-face-attribute 'variable-pitch nil :font "Liberation Sans" :height 115)
+#+END_SRC 
+
+* Counsel
+
+#+BEGIN_SRC elisp
+  ;; include counsel package for searching
+  (use-package counsel
+    :bind(("M-x" . counsel-M-x)
+	  ("C-x b" . counsel-ibuffer)
+	  ("C-x C-f" . counsel-find-file)
+	  :map minibuffer-local-map
+	  ("C-r" . 'counsel-minibuffer-history))
+    :config
+    (setq ivy-initial-inputs-alist nil))
+#+END_SRC 
+
+* Projectile
+#+BEGIN_SRC elisp
+  (use-package projectile
+    :diminish projectile-mode
+    :config (projectile-mode)
+    :custom (projectile-completion-system 'ivy)
+    :bind-keymap
+    ("C-c p" . projectile-command-map)
+    :init
+    (when (file-directory-p "/home/clayton")
+      (setq projectile-project-search-path '("/home/clayton")))
+    (setq projectile-switch-project-action #'projectile-dired))
+
+  (use-package counsel-projectile
+    :config (counsel-projectile-mode))
+#+END_SRC
+
+* Org mode
+"Org is a highly flexible structured plain text file format"
+
+[[https://orgmode.org/][Org Mode website]]
+
+** Org declaration
+#+BEGIN_SRC elisp
+  (use-package org
+    :ensure t
+    :config
+    (setq org-ellipsis " ▾"
+	  org-hide-emphasis-markers t
+	  )
+    )
+  ;; set directory for org agenda
+  (defun my-org-files ()
+    "Return a list of all .org files in the ~/Analysis/org directory and its subdirectories."
+    (directory-files-recursively "~/Analysis/org" "\.org$"))
+  (setq org-agenda-files (my-org-files))
+#+END_SRC 
+** Org Agenda
+#+BEGIN_SRC elisp
+  (setq org-agenda-start-with-log-mode t)
+  (setq org-log-done 'time) ;; add a time-stamp once a task is completed
+  (setq org-log-into-drawer t)
+#+END_SRC 
+** Face font size
+
+#+BEGIN_SRC elisp
+  ;; Set faces for heading levels
+  (dolist (face '((org-level-1 . 1.15)
+                  (org-level-2 . 1.1)
+                  (org-level-3 . 1.05)
+                  (org-level-4 . 1.0)
+                  (org-level-5 . 1.0)
+                  (org-level-6 . 1.0)
+                  (org-level-7 . 1.0)
+                  (org-level-8 . 1.0)))
+    (set-face-attribute (car face) nil :font "Liberation Sans" :weight 'regular :height (cdr face)))
+#+END_SRC 
+
+** Org key-bindings
+#+BEGIN_SRC elisp
+  ;; org key-binds (from org-manual)
+  (global-set-key (kbd "C-c l") #'org-store-link)
+  (global-set-key (kbd "C-c a") #'org-agenda)
+  (global-set-key (kbd "C-c c") #'org-capture)
+#+END_SRC 
+
+** Style
+#+BEGIN_SRC elisp
+  ;; org bullets
+  (use-package org-bullets
+    :config
+    (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+  ;; wrap lines in org-mode
+  (add-hook 'org-mode-hook
+	    (lambda ()
+	      (toggle-truncate-lines nil)
+	      (variable-pitch-mode t)))
+  ;; set separator lines to zero in org
+  (setq org-cycle-separator-lines 0)
+  ;; replace hyphen list with dot
+  (font-lock-add-keywords 'org-mode
+			  '(("^ *\\([-]\\) "
+			     (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+  ;; Ensure that anything that should be fixed-pitch in Org files appears that way
+  (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-table nil   :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
+  ;; don't display line-numbers in org-mode
+  (defun nodisplaylinum()
+    (display-line-numbers-mode 0)
+    )
+  (add-hook 'org-mode-hook 'nodisplaylinum)
+  ;; add some space to the left edge of the buffer
+  (defun efs/org-mode-visual-fill ()
+    (setq visual-fill-column-width 100
+	  visual-fill-column-center-text t)
+    (visual-fill-column-mode 1))
+
+  (use-package visual-fill-column
+    :hook (org-mode . efs/org-mode-visual-fill))
+
+#+END_SRC 
+
+** "TODO" keywords
+#+BEGIN_SRC elisp
+  ;; set TODO types
+  (setq org-todo-keywords '((type "TODO" "IN PROGRESS" "WAIT" "|" "DONE")))
+#+END_SRC 
+
+** "TODO" tags
+#+BEGIN_SRC elisp
+  ;; set TODO tags
+  (setq org-tag-alist '(("@Analysis" . ?A)
+			("@CERN" . ?C)
+			("@FNAL" . ?F)
+			("@UIC" . ?U)
+			("@Personal" . ?P)
+			("@HLT" . ?H)
+			("@AlCaDB" . ?D)
+			("@muons" . ?m)
+			("@jets" . ?j)
+			("@trigger" . ?t)
+			("@jetFlavor" . ?r)
+			("@ghosts" . ?x)
+			("@jetReconstruction" . ?q)
+			("@muonReconstruction" . ?w)
+			("@templates" . ?y)
+			("@fits" . ?f)
+			("@pixels" . ?z)
+			("@forests" . ?u)
+			("@systematics" . ?s)
+			("@production" . ?p)
+			("@DQM" . ?Q)))
+
+#+END_SRC 
+
+** Org Roam
+#+BEGIN_SRC elisp
+ ;; org-roam
+  (use-package org-roam
+    :ensure t
+    :init
+    (setq org-roam-v2-ack t)
+    :custom
+    (org-roam-directory "~/RoamNotes")
+    (org-roam-completion-everywhere t)
+    :bind (("C-c n l" . org-roam-buffer-toggle)
+	   ("C-c n f" . org-roam-node-find)
+	   ("C-c n i" . org-roam-node-insert)
+	   :map org-mode-map
+	   ("C-M-i" . completion-at-point)
+	   :map org-roam-dailies-map
+	   ("Y" . org-roam-dailies-capture-yesterday)
+	   ("T" . org-roam-dailies-capture-tomorrow))
+    :bind-keymap
+    ("C-c n d" . org-roam-dailies-map)
+    :config
+    (require 'org-roam-dailies) ;; Ensure the keymap is available
+    (org-roam-db-autosync-mode))
+  ;; set journal directory
+  (setq org-roam-dailies-directory "journal/")
+
+#+END_SRC 
+
+** Latex
+org-mode latex fragment preview settings
+#+BEGIN_SRC elisp
+  (setq org-format-latex-options
+	'(:foreground default
+		      :background default
+		      :scale 1.5)
+	)
+#+END_SRC 
+
+** Export options
+#+BEGIN_SRC elisp
+  ;; disable line-numbers in org-export
+  (setq org-export-with-section-numbers nil)
+#+END_SRC
+* Magit
+Magit : "A Git Porcelain inside Emacs"
+https://magit.vc
+
+#+BEGIN_SRC elisp
+  (use-package magit
+    :commands (magit-status magit-get-current-branch)
+    :custom
+    (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
+#+END_SRC 
+* Forge
+"Forge allows you to work with Git forges, such as Github and Gitlab, from the comfort of Magit and the rest of Emacs"
+https://magit.vc/manual/forge/
+#+BEGIN_SRC elisp
+  (use-package forge)
+#+END_SRC 
+* Command-log-mode
+#+BEGIN_SRC elisp
+  (use-package command-log-mode)
+#+END_SRC 
+
+* Beacon
+#+BEGIN_SRC elisp
+  (beacon-mode 1)
+  ;;(setq beacon-color "#E2F516")
+  (setq beacon-color "#ff8c00") ; orange beacon
+#+END_SRC 
+
+* Minimap
+#+BEGIN_SRC elisp
+  (minimap-mode 0)
+  (setq minimap-window-location 'right)
+#+END_SRC 
+
+* Line numbers
+#+BEGIN_SRC elisp
+  ;; line numbers
+  (column-number-mode)
+  (global-display-line-numbers-mode t)
+
+  ;; disable line-numbers in multi-term
+  (add-hook 'term-mode-hook (lambda () (display-line-numbers-mode 0)))
+#+END_SRC 
+
+* which-key
+Which-key function: displays the key-bindings in a lower window
+#+BEGIN_SRC elisp
+  (use-package which-key
+    :init (which-key-mode)
+    :diminish which-key-mode
+    :config
+    (setq which-key-idle-delay 1.0))
+
+#+END_SRC 
+
+* ivy
+#+BEGIN_SRC elisp
+  (use-package ivy
+    :diminish
+    :bind (("C-s" . swiper)
+	   :map ivy-minibuffer-map
+	   ("TAB" . ivy-alt-done)
+	   ("C-l" . ivy-alt-done)
+	   ("C-j" . ivy-next-line)
+	   ("C-k" . ivy-previous-line)
+	   :map ivy-switch-buffer-map
+	   ("C-k" . ivy-previous-line)
+	   ("C-l" . ivy-done)
+	   ("C-d" . ivy-switch-buffer-kill)
+	   :map ivy-reverse-i-search-map
+	   ("C-k" . ivy-previous-line)
+	   ("C-d" . ivy-reverse-i-search-kill))
+    :config
+    (ivy-mode 1))
+
+  ;; ivy-rich, display desciptive information about M-x commands
+  (use-package ivy-rich
+    :init
+    (ivy-rich-mode 1))
+
+#+END_SRC 
+
+* ivy-rich
+display desciptive information about M-x commands
+#+BEGIN_SRC elisp
+  (use-package ivy-rich
+    :init
+    (ivy-rich-mode 1))
+#+END_SRC 
+
+* all-the-icons
+NOTE: The first time you load your configuration on a new machine, you'll
+ need to run the following command interactively so that mode line icons
+ display correctly:
+ 
+ M-x all-the-icons-install-fonts
+
+#+BEGIN_SRC elisp
+  (use-package all-the-icons)
+#+END_SRC 
+
+* doc-view
+#+BEGIN_SRC elisp
+  (setq doc-view-scale-internally nil)
+#+END_SRC 
+
+* diary
+Your diary keeps track of appointments and important dates.
+
+The diary filepath is ~~/.emacs.d/diary~
+
+Keep your diary up to date!
+Display the diary for the day upon launch
+#+BEGIN_SRC elisp
+(diary)
+#+END_SRC 
+
+* dired
+#+BEGIN_SRC elisp
+  ;; icons in dired
+  (add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
+#+END_SRC 
+
+* ibuffer
+#+BEGIN_SRC elisp
+  ;; icons in buffer
+  (add-hook 'ibuffer-mode-hook #'all-the-icons-ibuffer-mode)
+
+  (use-package all-the-icons-ibuffer
+    :ensure t
+    :hook (ibuffer-mode . all-the-icons-ibuffer-mode))
+
+  ;; Predicate whether the icons are able to be displayed."
+  (setq all-the-icons-ibuffer-display-predicate #'display-graphic-p)
+
+  ;; Whether display the icons.
+  (setq all-the-icons-ibuffer-icon t)
+  ;; Whether display the colorful icons.
+  ;; It respects `all-the-icons-color-icons'.
+  (setq all-the-icons-ibuffer-color-icon t)
+
+  ;; The default icon size in ibuffer.
+  (setq all-the-icons-ibuffer-icon-size 1.0)
+
+  ;; The default vertical adjustment of the icon in ibuffer.
+  (setq all-the-icons-ibuffer-icon-v-adjust 0.0)
+
+  ;; Use human readable file size in ibuffer.
+  (setq  all-the-icons-ibuffer-human-readable-size t)
+
+#+END_SRC 
+
+* all-the-icons
+#+BEGIN_SRC elisp
+  (require 'all-the-icons-gnus)
+  (all-the-icons-gnus-setup)
+#+END_SRC 
+* ssh
+#+BEGIN_SRC elisp
+  ;; enable ssh
+  (require 'ssh)
+  (add-hook 'ssh-mode-hook
+	    (lambda ()
+	      (setq ssh-directory-tracking-mode t)
+	      (shell-dirtrack-mode t)
+	      (setq dirtrackp nil)))
+#+END_SRC
+* give-me-some-space
+#+BEGIN_SRC elisp
+;; ------------------
+;;
+;; give me some space!
+;;
+;; ------------------
+#+END_SRC
+
+
+
+
