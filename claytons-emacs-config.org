@@ -19,7 +19,7 @@ Keybinding table:
 | ~M-x org-capture~            | ~C-c c~      |
 | Org Roam                   |            |
 | ~M-x org-roam-buffer-toggle~ | ~C-c n l~    |
-| ~M-x org-~roam-node-find~     | ~C-c n f~    |
+| ~M-x org-roam-node-find~     | ~C-c n f~    |
 | ~M-x org-roam-insert~        | ~C-c n i~    |
 | ~M-x org-roam-dailies-map~   | ~C-c n d~    |
 | Projectile                 |            |
@@ -440,10 +440,11 @@ NOTE: The first time you load your configuration on a new machine, you'll
 * diary
 Your diary keeps track of appointments and important dates.
 
-The diary filepath is ~~/.emacs.d/diary~
+The diary filepath is  ~~/.emacs.d/diary~
 
 Keep your diary up to date!
 Display the diary for the day upon launch
+
 #+BEGIN_SRC elisp
 (diary)
 #+END_SRC 
