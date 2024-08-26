@@ -13,6 +13,8 @@ Keybinding table:
 | General-use                  |            |
 | ~M-x replace-string~         | ~C-c r~    |
 | ~M-x multi-term~             | ~C-c m~    |
+| ~M-x comment-region~         | ~C-c ;~    |
+| ~M-x uncomment-region~       | ~C-c u~    |
 | Org                          |            |
 | ~M-x org-store-link~         | ~C-c l~    |
 | ~M-x org-agenda~             | ~C-c a~    |
@@ -28,9 +30,9 @@ Keybinding table:
   ;;(when window-system (set-frame-size (selected-frame) 160 60)) ; frame size
   (setq inhibit-startup-message t) ; skip the startup screen
   (scroll-bar-mode -1) ; disable the scroll bar
-  (tool-bar-mode -1) ; disable the tool abr
+  ;;(tool-bar-mode -1) ; disable the tool abr
   (set-fringe-mode 10) ; give some breathing room
-  (menu-bar-mode -1) ; disable the menu bar
+  ;;(menu-bar-mode -1) ; disable the menu bar
   (setq visible-bell t) ; set up the visible bell
   (blink-cursor-mode 0) ; disable the blinking cursor
   (use-package saveplace
@@ -39,22 +41,22 @@ Keybinding table:
 #+END_SRC 
 * Package sources
 #+BEGIN_SRC elisp
-    ;; initialize package sources
-    (require 'package)
-    (setq package-archives '(("melpa" . "https://melpa.org/packages/")
-			     ("org" . "https://orgmode.org/elpa/")
-			     ("elpa" . "https://elpa.gnu.org/packages/")
-			     ("melpa-stable" . "https://stable.melpa.org/packages/")))
-    (package-initialize)
-    (unless package-archive-contents
-      (package-refresh-contents))
+  ;; initialize package sources
+  (require 'package)
+  (setq package-archives '(("melpa" . "https://melpa.org/packages/")
+			   ("org" . "https://orgmode.org/elpa/")
+			   ("elpa" . "https://elpa.gnu.org/packages/")
+			   ("melpa-stable" . "https://stable.melpa.org/packages/")))
+  (package-initialize)
+  (unless package-archive-contents
+    (package-refresh-contents))
 
-    ;; initialize use-package on non-Linux platforms
-    (unless (package-installed-p 'use-package)
-      (package-install 'use-package))
+  ;; initialize use-package on non-Linux platforms
+  (unless (package-installed-p 'use-package)
+    (package-install 'use-package))
 
-    (require 'use-package)
-    (setq use-package-always-ensure t)
+  (require 'use-package)
+  (setq use-package-always-ensure t)
 #+END_SRC 
 * Custom keybindings
 #+BEGIN_SRC elisp
@@ -72,7 +74,8 @@ Keybinding table:
   ;; theme packages
   (use-package standard-themes)
   ;; load theme
-  (load-theme 'doom-zenburn)
+  (load-theme 'tango)
+  ;;(load-theme 'doom-zenburn)
   ;;(load-theme 'spacemacs-theme)
   ;;(load-theme 'wombat)
   ;;(load-theme 'standard-dark)
@@ -115,7 +118,7 @@ save state of emacs session
 * Font
 #+BEGIN_SRC elisp
   ;;(set-face-attribute 'default nil :font "UbuntuMono Nerd Font" :height 115)
-  (set-face-attribute 'default nil :font "JetBrains Mono" :height 110)
+  (set-face-attribute 'default nil :font "JetBrains Mono" :height 105)
 #+END_SRC 
 
 * Counsel
