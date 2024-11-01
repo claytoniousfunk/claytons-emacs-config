@@ -1,7 +1,7 @@
 #+TITLE: Clayton's Emacs config
 #+PROPERTY: header-args :tangle .emacs
 
-* Emacs config
+* Information
 This is Clayton's config for Emacs.
 
 Tangle this config via ~M-x org-babel-tangle~ (~C-c C-v C-t~)
@@ -12,9 +12,12 @@ Keybinding table:
 |------------------------------+------------|
 | General-use                  |            |
 | ~M-x replace-string~         | ~C-c r~    |
-| ~M-x multi-term~             | ~C-c m~    |
 | ~M-x comment-region~         | ~C-c ;~    |
 | ~M-x uncomment-region~       | ~C-c u~    |
+| ~M-x calculator~             | ~C-c =~    |
+| Terminal                     |            |
+| ~M-x multi-term~             | ~C-c m~    |
+| ~M-x term-stop-subjob~       | ~C-c z~    |
 | Org                          |            |
 | ~M-x org-store-link~         | ~C-c l~    |
 | ~M-x org-agenda~             | ~C-c a~    |
@@ -24,20 +27,22 @@ Keybinding table:
 | ~M-x org-roam-node-find~     | ~C-c n f~  |
 | ~M-x org-roam-insert~        | ~C-c n i~  |
 | ~M-x org-roam-dailies-map~   | ~C-c n d~  |
+| Notmuch                      |            |
+| ~M-x notmuch~                | ~C-c e~    |
 
 * Menu and window
 #+BEGIN_SRC elisp
   ;;(when window-system (set-frame-size (selected-frame) 160 60)) ; frame size
   (setq inhibit-startup-message t) ; skip the startup screen
   (scroll-bar-mode -1) ; disable the scroll bar
-  ;;(tool-bar-mode -1) ; disable the tool abr
+  (tool-bar-mode -1) ; disable the tool abr
   (set-fringe-mode 10) ; give some breathing room
-  ;;(menu-bar-mode -1) ; disable the menu bar
+  (menu-bar-mode -1) ; disable the menu bar
   (setq visible-bell t) ; set up the visible bell
   (blink-cursor-mode 0) ; disable the blinking cursor
   (use-package saveplace
     :init (save-place-mode)) ; save place in the buffer
-  ;;(setq-default cursor-type 'bar) ;; bar-style cursor
+  (setq-default cursor-type 'bar) ;; bar-style cursor
 #+END_SRC 
 * Package sources
 #+BEGIN_SRC elisp
@@ -64,22 +69,25 @@ Keybinding table:
   (global-set-key (kbd "C-c m") #'multi-term)
   (global-set-key (kbd "C-c u") #'uncomment-region)
   (global-set-key (kbd "C-c ;") #'comment-region)
+  (global-set-key (kbd "C-c z") #'term-stop-subjob)
+  (global-set-key (kbd "C-c =") #'calculator)
 #+END_SRC 
 * Theme
 #+BEGIN_SRC elisp
   (setq custom-safe-themes t) ;; treat themes as safe
-  ;;(require 'doom-themes)
+  (require 'doom-themes)
   (require 'standard-themes)
   ;; Set theme
   ;; theme packages
   (use-package standard-themes)
   ;; load theme
-  (load-theme 'tango)
+  ;;(load-theme 'tango)
   ;;(load-theme 'doom-zenburn)
   ;;(load-theme 'spacemacs-theme)
   ;;(load-theme 'wombat)
   ;;(load-theme 'standard-dark)
   ;;(load-theme 'standard-light)
+  (load-theme 'tango-dark)
 
 #+END_SRC 
 
@@ -111,8 +119,8 @@ save state of emacs session
 
 * Transparency
 #+BEGIN_SRC elisp
- ;;(set-frame-parameter (selected-frame) 'alpha '(65 . 100))
- ;;(add-to-list 'default-frame-alist '(alpha . (65 . 100)))
+  ;;(set-frame-parameter (selected-frame) 'alpha '(65 . 100))
+  ;;(add-to-list 'default-frame-alist '(alpha . (65 . 100)))
 #+END_SRC 
 
 * Font
@@ -150,15 +158,15 @@ save state of emacs session
 
   ;; (use-package counsel-projectile
   ;;   :config (counsel-projectile-mode))
-  
+
 #+END_SRC
 
 * Evil Mode
 enable evil mode (vim keybindings)
 
 #+BEGIN_SRC elisp
-(require 'evil)
-(evil-mode 0)
+  (require 'evil)
+  (evil-mode 0)
 #+END_SRC 
 
 * Org mode
@@ -168,24 +176,26 @@ enable evil mode (vim keybindings)
 
 ** Org declaration
 #+BEGIN_SRC elisp
-    (use-package org
-      :ensure t
-      :config
-      (setq org-ellipsis " ▾"
-	    org-hide-emphasis-markers nil
-	    )
-      )
-    ;; set directory for org agenda
-    (defun my-org-files ()
-      "Return a list of all .org files in the ~/Analysis/org directory and its subdirectories."
-      (directory-files-recursively "~/Analysis/org" "\.org$"))
-    (setq org-agenda-files (my-org-files))
+  (use-package org
+    :ensure t
+    :config
+    (setq org-ellipsis " ▾"
+	  org-hide-emphasis-markers nil
+	  global-emojify-mode t
+	  )
+    )
+  ;; set directory for org agenda
+  (defun my-org-files ()
+    "Return a list of all .org files in the ~/Analysis/org directory and its subdirectories."
+    (directory-files-recursively "~/Analysis/org" "\\.org$"))
+  (setq org-agenda-files (my-org-files))
 #+END_SRC 
 ** Org Agenda
 #+BEGIN_SRC elisp
   (setq org-agenda-start-with-log-mode t)
   (setq org-log-done 'time) ;; add a time-stamp once a task is completed
   (setq org-log-into-drawer t)
+  (setq org-agenda-include-diary t) ;; inclulde diary entries in org-agenda
 #+END_SRC 
 ** Face font size
 
@@ -211,37 +221,37 @@ enable evil mode (vim keybindings)
 
 ** Style
 #+BEGIN_SRC elisp
-    ;; org bullets
-    (use-package org-bullets
-       :config
-       (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+  ;; org bullets
+  (use-package org-bullets
+    :config
+    (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 
-    ;;wrap lines in org-mode
-    (add-hook 'org-mode-hook
-	      (lambda ()
-		(toggle-truncate-lines nil)))
-    ;; set separator lines to zero in org
-    ;;(setq org-cycle-separator-lines 0)
-    ;; replace hyphen list with dot
-    ;; (font-lock-add-keywords 'org-mode
-    ;; 			'(("^ *\\([-]\\) "
-    ;; 			   (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
-    ;;
+  ;;wrap lines in org-mode
+  (add-hook 'org-mode-hook
+	    (lambda ()
+	      (toggle-truncate-lines nil)))
+  ;; set separator lines to zero in org
+  ;;(setq org-cycle-separator-lines 0)
+  ;; replace hyphen list with dot
+  ;; (font-lock-add-keywords 'org-mode
+  ;; 			'(("^ *\\([-]\\) "
+  ;; 			   (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+  ;;
 
-    ;; don't display line-numbers in org-mode or org-agenda
-    (defun nodisplaylinum()
-      (display-line-numbers-mode 0)
-      )
-    (add-hook 'org-mode-hook 'nodisplaylinum)
-    (add-hook 'org-agenda-mode-hook 'nodisplaylinum)
-    ;; add some space to the left edge of the buffer
-    (defun efs/org-mode-visual-fill ()
-      (setq visual-fill-column-width 140
-	    visual-fill-column-center-text t)
-      (visual-fill-column-mode 1))
+  ;; don't display line-numbers in org-mode or org-agenda
+  (defun nodisplaylinum()
+    (display-line-numbers-mode 0)
+    )
+  (add-hook 'org-mode-hook 'nodisplaylinum)
+  (add-hook 'org-agenda-mode-hook 'nodisplaylinum)
+  ;; add some space to the left edge of the buffer
+  (defun efs/org-mode-visual-fill ()
+    (setq visual-fill-column-width 140
+	  visual-fill-column-center-text t)
+    (visual-fill-column-mode 1))
 
-    (use-package visual-fill-column
-      :hook (org-mode . efs/org-mode-visual-fill))
+  (use-package visual-fill-column
+    :hook (org-mode . efs/org-mode-visual-fill))
 
 #+END_SRC 
 
@@ -253,29 +263,29 @@ enable evil mode (vim keybindings)
 
 ** Tags
 #+BEGIN_SRC elisp
-    ;; set TODO tags
-    (setq org-tag-alist '(("@Analysis" . ?A)
-			  ("@CERN" . ?C)
-			  ("@FNAL" . ?F)
-			  ("@UIC" . ?U)
-			  ("@Personal" . ?P)
-			  ("@morningPages" . ?o)
-			  ("@HLT" . ?H)
-			  ("@AlCaDB" . ?D)
-			  ("@MC" . ?M)
-			  ("@highPT" . ?h)
-			  ("@DQM" . ?Q)
-			  ("@muons" . ?m)
-			  ("@jets" . ?j)
-			  ("@thoughts" . ?t)
-			  ("@jetFlavor" . ?r)
-			  ("@ghosts" . ?x)
-			  ("@jetReconstruction" . ?q)
-			  ("@muonReconstruction" . ?w)
-			  ("@templates" . ?y)
-			  ("@forests" . ?u)
-			  ("@systematics" . ?s)
-			  ("@production" . ?p)))
+  ;; set TODO tags
+  (setq org-tag-alist '(("@Analysis" . ?A)
+			("@CERN" . ?C)
+			("@FNAL" . ?F)
+			("@UIC" . ?U)
+			("@Personal" . ?P)
+			("@morningPages" . ?o)
+			("@HLT" . ?H)
+			("@AlCaDB" . ?D)
+			("@MC" . ?M)
+			("@highPT" . ?h)
+			("@DQM" . ?Q)
+			("@muons" . ?m)
+			("@jets" . ?j)
+			("@thoughts" . ?t)
+			("@jetFlavor" . ?r)
+			("@ghosts" . ?x)
+			("@jetReconstruction" . ?q)
+			("@muonReconstruction" . ?w)
+			("@templates" . ?y)
+			("@forests" . ?u)
+			("@systematics" . ?s)
+			("@production" . ?p)))
 
 #+END_SRC 
 
@@ -324,6 +334,7 @@ org-mode latex fragment preview settings
 #+END_SRC 
 
 ** Export options
+SCHEDULED: <2024-09-02 Mon>
 #+BEGIN_SRC elisp
   ;; disable line-numbers in org-export
   (setq org-export-with-section-numbers nil)
@@ -411,8 +422,9 @@ https://github.com/emacs-dashboard/emacs-dashboard]]
 #+END_SRC 
 
 * Beacon
+
 #+BEGIN_SRC elisp
-  (beacon-mode 1)
+  (beacon-mode 0)
   ;;(setq beacon-color "#E2F516")
   (setq beacon-color "#ff8c00") ; orange beacon
 #+END_SRC 
@@ -482,10 +494,10 @@ display desciptive information about M-x commands
 
 * all-the-icons
 NOTE: The first time you load your configuration on a new machine, you'll
- need to run the following command interactively so that mode line icons
- display correctly:
+need to run the following command interactively so that mode line icons
+display correctly:
  
- M-x all-the-icons-install-fonts
+M-x all-the-icons-install-fonts
 
 #+BEGIN_SRC elisp
   (use-package all-the-icons)
@@ -566,14 +578,85 @@ Some configuration copied from [[https://www.emacswiki.org/emacs/DiaryMode][http
 	    (lambda ()
 	      (display-line-numbers-mode 0)))
 #+END_SRC 
-* give-me-some-space
+
+* Email
+This is a bit experimental, but I want to try and manage email within emacs.  
+
 #+BEGIN_SRC elisp
-;; ------------------
-;;
-;; give me some space!
-;;
-;; ------------------
-#+END_SRC
+  ;; (setq smtpmail-default-smtp-server "smtp.gmail.com")
+  ;; (require 'smtpmail)
+  ;; (setq send-mail-function 'smtpmail-send-it)
+  ;; (setq message-send-mail-function 'smtpmail-send-it)
+  ;; (setq user-full-name "Clayton Bennett")
+  ;; (setq smtpmail-local-domain "gmail.com")
+  ;; (setq user-mail-address (concat "cbennett0715@" smtpmail-local-domain))
+  ;; (setq smtpmail-servers-requiring-authorization ".*")
+  ;; (setq smtpmail-debug-info t)
+#+END_SRC 
+
+#+BEGIN_SRC elisp
+  (setq user-mail-address "cbenne22@uic.edu"
+	user-full-name "Clayton Bennett")
+  (setq mail-user-agent 'message-user-agent)
+  (setq message-send-mail-function 'smtpmail-send-it
+	smtpmail-stream-type 'starttls
+	smtpmail-smtp-server "smtp.gmail.com"
+	smtpmail-smtp-service 587)
+#+END_SRC 
+
+#+BEGIN_SRC elisp
+  ;; Configure known SMTP servers. Emacs prompts for passwords and saves them in ~/.authinfo
+  ;; (setq smtp-accounts          ;; Format: Sender Mail address - SMTP Server - Port - Username
+  ;;       '(("cbennett0715@gmail.com" "smtp.gmail.com" 587 "cbennett0715@gmail.com")
+  ;; 	("cbenne22@uic.edu" "smtp.gmail.com" 587 "cbenne22@uic.edu")
+  ;; 	("clayton.bennett@cern.ch" "smtp-mail.outlook.com" 587 "clayton.bennett@cern.ch")
+  ;; 	))
+
+  ;; ;; Set the SMTP Server according to the mail address we use for sending
+  ;; (defun set-smtp-server-message-send-and-exit ()
+  ;;   "Set SMTP server from list of multiple ones and send mail."
+  ;;   (interactive)
+  ;;   (message-remove-header "X-Message-SMTP-Method") ;; Remove. We always determine it by the From field
+  ;;   (let ((sender
+  ;; 	 (message-fetch-field "From")))
+  ;;     (loop for (addr server port usr) in smtp-accounts
+  ;; 	  when (string-match addr sender)
+  ;; 	  do (message-add-header (format "X-Message-SMTP-Method: smtp %s %d %s" server port usr)))
+  ;;     (let ((xmess
+  ;; 	   (message-fetch-field "X-Message-SMTP-Method")))
+  ;;       (if xmess
+  ;; 	  (progn
+  ;; 	    (message (format "Sending message using '%s' with config '%s'" sender xmess))
+  ;; 	    (message-send-and-exit))
+  ;; 	(error "Could not find SMTP Server for this Sender address: %s. You might want to correct it or add it to the SMTP Server list 'smtp-accounts'" sender)))))
+#+END_SRC 
+
+* Notmuch
+Notmuch -- Just an email system
+
+https://notmuchmail.org/
+
+#+BEGIN_SRC elisp
+  (autoload 'notmuch "notmuch" "notmuch mail" t)
+  (setq notmuch-search-oldest-first nil)
+  ;; turn off line numbers (thanks ChatGPT for writing this)
+  (add-hook 'notmuch-show-mode-hook (lambda () (display-line-numbers-mode -1)))
+  (add-hook 'notmuch-search-mode-hook (lambda () (display-line-numbers-mode -1)))
+  (add-hook 'notmuch-hello-mode-hook (lambda () (display-line-numbers-mode -1)))
+  ;; custom keybindings
+  (global-set-key (kbd "C-c e") #'notmuch)
+  ;; custom search settings
+  (setq notmuch-saved-searches
+   '((:name "inbox" :query "tag:inbox" :key "i")
+     (:name "unread" :query "tag:unread" :key "u")
+     (:name "todo" :query "tag:todo" :key "t")))
+
+#+END_SRC 
+
+* Emojis
+#+BEGIN_SRC elisp
+  (setq global-emojify-mode t)
+#+END_SRC 
 
 
 
