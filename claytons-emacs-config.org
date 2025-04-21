@@ -32,11 +32,11 @@ Keybinding table:
 
 * Menu and window
 #+BEGIN_SRC elisp
-  ;;(when window-system (set-frame-size (selected-frame) 160 60)) ; frame size
+  (when window-system (set-frame-size (selected-frame) 90 30)) ; frame size
   (setq inhibit-startup-message t) ; skip the startup screen
   (scroll-bar-mode -1) ; disable the scroll bar
   (tool-bar-mode -1) ; disable the tool abr
-  (set-fringe-mode 10) ; give some breathing room
+  ;;(set-fringe-mode 10) ; give some breathing room
   (menu-bar-mode -1) ; disable the menu bar
   (setq visible-bell t) ; set up the visible bell
   (blink-cursor-mode 0) ; disable the blinking cursor
@@ -44,6 +44,7 @@ Keybinding table:
     :init (save-place-mode)) ; save place in the buffer
   (setq-default cursor-type 'bar) ;; bar-style cursor
 #+END_SRC 
+
 * Package sources
 #+BEGIN_SRC elisp
   ;; initialize package sources
@@ -63,17 +64,20 @@ Keybinding table:
   (require 'use-package)
   (setq use-package-always-ensure t)
 #+END_SRC 
+
 * Custom keybindings
 #+BEGIN_SRC elisp
   (global-set-key (kbd "C-c r") #'replace-string)
   (global-set-key (kbd "C-c m") #'multi-term)
-  (global-set-key (kbd "C-c u") #'uncomment-region)
-  (global-set-key (kbd "C-c ;") #'comment-region)
+  (global-set-key (kbd "C-c u") #'comment-or-uncomment-region)
   (global-set-key (kbd "C-c z") #'term-stop-subjob)
   (global-set-key (kbd "C-c =") #'calculator)
 #+END_SRC 
+
 * Theme
 #+BEGIN_SRC elisp
+  (add-to-list 'load-path "~/.emacs.d/modus-themes")
+  (require 'modus-themes)
   (setq custom-safe-themes t) ;; treat themes as safe
   (require 'doom-themes)
   (require 'standard-themes)
@@ -81,13 +85,9 @@ Keybinding table:
   ;; theme packages
   (use-package standard-themes)
   ;; load theme
-  ;;(load-theme 'tango)
-  ;;(load-theme 'doom-zenburn)
-  ;;(load-theme 'spacemacs-theme)
-  ;;(load-theme 'wombat)
-  ;;(load-theme 'standard-dark)
-  ;;(load-theme 'standard-light)
-  (load-theme 'tango-dark)
+  (load-theme 'modus-operandi-deuteranopia) ;; light theme
+  ;; (load-theme 'modus-vivendi-deuteranopia)     ;; dark theme
+
 
 #+END_SRC 
 
@@ -108,6 +108,7 @@ save state of emacs session
 #+begin_src elisp
   (desktop-save-mode 0)
 #+end_src
+
 * Rainbow delimiters
 #+BEGIN_SRC elisp
   ;; show parentheses
@@ -119,14 +120,15 @@ save state of emacs session
 
 * Transparency
 #+BEGIN_SRC elisp
-  ;;(set-frame-parameter (selected-frame) 'alpha '(65 . 100))
-  ;;(add-to-list 'default-frame-alist '(alpha . (65 . 100)))
+  ;; (set-frame-parameter (selected-frame) 'alpha '(75 . 100))
+  ;; (add-to-list 'default-frame-alist '(alpha . (75 . 100)))
 #+END_SRC 
 
 * Font
 #+BEGIN_SRC elisp
-  ;;(set-face-attribute 'default nil :font "UbuntuMono Nerd Font" :height 115)
-  (set-face-attribute 'default nil :font "JetBrains Mono" :height 105)
+  (set-face-attribute 'default nil :font "UbuntuMono Nerd Font" :height 125)
+  ;;(set-face-attribute 'default nil :font "JetBrains Mono" :height 120)
+  ;;(set-face-attribute 'default nil :font "DejaVu Sans Mono" :height 105)
 #+END_SRC 
 
 * Counsel
@@ -161,12 +163,13 @@ save state of emacs session
 
 #+END_SRC
 
-* Evil Mode
+*
+Evil Mode
 enable evil mode (vim keybindings)
 
 #+BEGIN_SRC elisp
-  (require 'evil)
-  (evil-mode 0)
+  ;;(require 'evil)
+  ;;(evil-mode 0)
 #+END_SRC 
 
 * Org mode
@@ -180,15 +183,20 @@ enable evil mode (vim keybindings)
     :ensure t
     :config
     (setq org-ellipsis " ▾"
-	  org-hide-emphasis-markers nil
-	  global-emojify-mode t
-	  )
+  	org-hide-emphasis-markers nil
+  	global-emojify-mode t
+  	)
     )
   ;; set directory for org agenda
   (defun my-org-files ()
     "Return a list of all .org files in the ~/Analysis/org directory and its subdirectories."
     (directory-files-recursively "~/Analysis/org" "\\.org$"))
-  (setq org-agenda-files (my-org-files))
+  (defun load-org-files()
+    "Load my-org-files so that they appear in Org-agenda"
+    (setq org-agenda-files (my-org-files)))
+  (add-hook 'org-mode-hook 'load-org-files)
+  (add-hook 'org-agenda-mode-hook 'load-org-files)
+
 #+END_SRC 
 ** Org Agenda
 #+BEGIN_SRC elisp
@@ -222,11 +230,11 @@ enable evil mode (vim keybindings)
 ** Style
 #+BEGIN_SRC elisp
   ;; org bullets
-  (use-package org-bullets
-    :config
-    (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+  ;; (use-package org-bullets
+  ;;   :config
+  ;;   (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 
-  ;;wrap lines in org-mode
+  ;; ;;wrap lines in org-mode
   (add-hook 'org-mode-hook
 	    (lambda ()
 	      (toggle-truncate-lines nil)))
@@ -250,8 +258,8 @@ enable evil mode (vim keybindings)
 	  visual-fill-column-center-text t)
     (visual-fill-column-mode 1))
 
-  (use-package visual-fill-column
-    :hook (org-mode . efs/org-mode-visual-fill))
+  ;; (use-package visual-fill-column
+  ;;   :hook (org-mode . efs/org-mode-visual-fill))
 
 #+END_SRC 
 
@@ -264,7 +272,8 @@ enable evil mode (vim keybindings)
 ** Tags
 #+BEGIN_SRC elisp
   ;; set TODO tags
-  (setq org-tag-alist '(("@Analysis" . ?A)
+  (setq org-tag-alist '(("@curious" . ?c)
+			("@Analysis" . ?A)
 			("@CERN" . ?C)
 			("@FNAL" . ?F)
 			("@UIC" . ?U)
@@ -359,12 +368,14 @@ https://magit.vc
     :custom
     (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 #+END_SRC 
+
 * Forge
 "Forge allows you to work with Git forges, such as Github and Gitlab, from the comfort of Magit and the rest of Emacs"
 https://magit.vc/manual/forge/
 #+BEGIN_SRC elisp
   (use-package forge)
 #+END_SRC 
+
 * Dashboard
 An extensible emacs startup screen showing you what’s most important.
 [[https://github.com/emacs-dashboard/emacs-dashboard][
@@ -533,6 +544,7 @@ Some configuration copied from [[https://www.emacswiki.org/emacs/DiaryMode][http
 #+BEGIN_SRC elisp
   ;; icons in dired
   (add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
+  (add-hook 'dired-mode-hook 'nodisplaylinum)
 #+END_SRC 
 
 * ibuffer
@@ -639,6 +651,7 @@ https://notmuchmail.org/
 #+BEGIN_SRC elisp
   (autoload 'notmuch "notmuch" "notmuch mail" t)
   (setq notmuch-search-oldest-first nil)
+  (setq org-agenda-max-depth 3)
   ;; turn off line numbers (thanks ChatGPT for writing this)
   (add-hook 'notmuch-show-mode-hook (lambda () (display-line-numbers-mode -1)))
   (add-hook 'notmuch-search-mode-hook (lambda () (display-line-numbers-mode -1)))
@@ -658,6 +671,12 @@ https://notmuchmail.org/
   (setq global-emojify-mode t)
 #+END_SRC 
 
-
-
-
+* Scratch buffer
+#+BEGIN_SRC elisp
+  (setq initial-scratch-message ";; scratch buffer \n\n")
+#+END_SRC 
+* Slime
+#+BEGIN_SRC elisp
+(load (expand-file-name "~/.quicklisp/slime-helper.el"))
+(setq inferior-lisp-program "sbcl")
+#+END_SRC
